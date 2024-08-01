@@ -1,0 +1,9 @@
+version: 2
+
+builds:
+  - binary: foundation
+  
+    env:
+      - CGO_ENABLED=0
+
+    main: './cmd/main.go'
