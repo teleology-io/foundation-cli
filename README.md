@@ -4,7 +4,7 @@ The Foundation CLI is your gateway to effortless interaction with the Foundation
 ## Installation
 
 ```
-TBD
+curl -s https://raw.githubusercontent.com/teleology-io/foundation-cli/master/download.sh | bash
 ```
 
 ## Authentication
