@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -40,16 +39,7 @@ func main() {
 				Aliases: []string{"env"},
 				Usage:   "Gets the environment",
 				Action: func(cCtx *cli.Context) error {
-					env, err := client.GetEnvironment()
-					if err != nil {
-						fmt.Println("environment command failed:", err.Error())
-						return nil
-					}
-
-					for k, v := range env {
-						fmt.Printf("%s=%v\n", k, v)
-					}
-
+					client.GetEnvironment()
 					return nil
 				},
 			},
@@ -58,13 +48,7 @@ func main() {
 				Aliases: []string{"config"},
 				Usage:   "Gets the configuration",
 				Action: func(cCtx *cli.Context) error {
-					config, err := client.GetConfiguration()
-					if err != nil {
-						fmt.Println("configuration command failed:", err.Error())
-						return nil
-					}
-
-					fmt.Printf("%s\n", config)
+					client.GetConfiguration()
 
 					return nil
 				},
@@ -86,13 +70,7 @@ func main() {
 					},
 				},
 				Action: func(cCtx *cli.Context) error {
-					result, err := client.GetVariable(variableName, uniqueID)
-					if err != nil {
-						fmt.Println("variable command failed:", err.Error())
-						return nil
-					}
-
-					fmt.Printf("%v\n", result)
+					client.GetVariable(variableName, uniqueID)
 
 					return nil
 				},

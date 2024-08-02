@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -101,6 +102,12 @@ func _request(c ApiClient, request Request) ([]byte, error) {
 		return nil, err
 	}
 
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		fmt.Println("ERROR:", string(body))
+		return nil, errors.New("request failed")
+	}
+
 	response, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -118,30 +125,32 @@ func indent(data interface{}) (string, error) {
 	return string(out), nil
 }
 
-func (client ApiClient) GetEnvironment() (map[string]interface{}, error) {
+func (client ApiClient) GetEnvironment() {
 	res, err := _request(client, Request{
 		Url:    "/v1/environment",
 		Method: GET,
 	})
 	if err != nil {
-		return nil, errors.New("environment request failed")
+		return
 	}
 
 	var env map[string]interface{}
 	if err = json.Unmarshal(res, &env); err != nil {
-		return nil, errors.New("environment parse error")
+		return
 	}
 
-	return env, nil
+	for k, v := range env {
+		fmt.Printf("%s=%v\n", k, v)
+	}
 }
 
-func (client ApiClient) GetConfiguration() (string, error) {
+func (client ApiClient) GetConfiguration() {
 	res, err := _request(client, Request{
 		Url:    "/v1/configuration",
 		Method: GET,
 	})
 	if err != nil {
-		return "", errors.New("environment request failed")
+		return
 	}
 
 	var data = struct {
@@ -149,27 +158,27 @@ func (client ApiClient) GetConfiguration() (string, error) {
 		MimeType string `json:"mime_type"`
 	}{}
 	if err := json.Unmarshal(res, &data); err != nil {
-		return "", errors.New("configuration parse error")
+		return
 	}
+
+	output := data.Content
 
 	if data.MimeType == "application/json" {
 		var content map[string]interface{}
 		if err = json.Unmarshal([]byte(data.Content), &content); err != nil {
-			return "", errors.New("configuration parse error - application/json")
+			return
 		}
 
 		out, err := indent(&content)
-		if err != nil {
-			return data.Content, nil
+		if err == nil {
+			output = out
 		}
-
-		return string(out), nil
 	}
 
-	return data.Content, nil
+	fmt.Printf("%s\n", output)
 }
 
-func (client ApiClient) GetVariable(variableName string, uniqueID string) (interface{}, error) {
+func (client ApiClient) GetVariable(variableName string, uniqueID string) {
 	data := map[string]string{
 		"name": variableName,
 	}
@@ -186,7 +195,7 @@ func (client ApiClient) GetVariable(variableName string, uniqueID string) (inter
 		},
 	})
 	if err != nil {
-		return "", errors.New("variable request failed")
+		return
 	}
 
 	var response = struct {
@@ -194,22 +203,25 @@ func (client ApiClient) GetVariable(variableName string, uniqueID string) (inter
 		Value interface{} `json:"value"`
 	}{}
 	if err := json.Unmarshal(res, &response); err != nil {
-		return "", errors.New("variable parse error")
+		return
 	}
+
+	value := response.Value
 
 	switch response.Value.(type) {
 	case map[string]interface{}:
 		{
 			out, err := indent(&response.Value)
-			if err != nil {
-				return response.Value, nil
+			if err == nil {
+				value = out
 			}
-
-			return string(out), nil
+			break
 		}
 	default:
 		{
-			return response.Value, nil
+			break
 		}
 	}
+
+	fmt.Printf("%v\n", value)
 }
