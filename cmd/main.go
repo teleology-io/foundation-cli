@@ -22,10 +22,11 @@ func main() {
 		Compiled: time.Now(),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "api-key",
-				Aliases: []string{"key"},
-				Usage:   "The api-key to make requests with",
-				EnvVars: []string{"FOUNDATION_API_KEY"},
+				Name:     "api-key",
+				Aliases:  []string{"key"},
+				Usage:    "The api-key to make requests with",
+				EnvVars:  []string{"FOUNDATION_API_KEY"},
+				Required: true,
 				Action: func(cCtx *cli.Context, flag string) error {
 					client = api.Create(flag)
 
@@ -40,6 +41,7 @@ func main() {
 				Usage:   "Gets the environment",
 				Action: func(cCtx *cli.Context) error {
 					client.GetEnvironment()
+
 					return nil
 				},
 			},
