@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var client api.ApiClient
+var client api.Api
 
 func main() {
 	var variableName string
